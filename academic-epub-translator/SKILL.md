@@ -1,6 +1,6 @@
 ---
 name: academic-epub-translator
-description: Translates EPUB books from English or other source languages into polished Chinese while preserving EPUB structure, examples, citations, figures, notes, and terminology. Use when the user asks to translate an EPUB, 翻译电子书, 翻译学术书, 分章翻译, or rebuild a translated EPUB, especially for academic, technical, linguistics, cognitive science, psychology, or language-processing books.
+description: Translates EPUB books from English or other source languages into polished Chinese while preserving EPUB structure, examples, citations, figures, notes, and terminology. Supports quality-first and speed-first translation modes. Use when the user asks to translate an EPUB, 翻译电子书, 翻译学术书, 分章翻译, or rebuild a translated EPUB, especially for academic, technical, linguistics, cognitive science, psychology, or language-processing books.
 ---
 
 # Academic EPUB Translator
@@ -8,6 +8,17 @@ description: Translates EPUB books from English or other source languages into p
 ## Core rule
 
 Translate from the actual complete EPUB, not from metadata, a summary, or isolated paragraphs. Preserve distinctions that carry evidence. Never translate an example when translating it would destroy the phenomenon under discussion.
+
+## Translation mode switch
+
+Choose one mode at the start of the task and record it in `TRANSLATION_STATE.md` as `translation_mode`:
+
+- `quality` (default): smallest safe unit, usually one section; reread and back-check each batch; parse XML after each batch; run full EPUB validation at every chapter and after risky structural edits.
+- `speed`: translate in larger coherent batches, usually 3-8 short sections or about 10-20 source pages; freeze the glossary after the first representative section; do one consolidated bilingual review per batch; parse XML after each batch; run full EPUB validation every 2-3 batches and at each chapter boundary.
+
+Speed mode changes batching and review cadence, not evidence-preservation rules. It must still preserve examples, notation, IDs, links, images, tables, footnotes, and pagebreak markers. It must never become an uncontrolled whole-book translation pass.
+
+Users can select a mode with wording such as `translation_mode=speed`, `用速度优先模式`, or `质量优先模式`. If no mode is specified, use `quality`.
 
 ## Locate the skill
 
@@ -43,17 +54,18 @@ python3 "$SKILL_DIR/scripts/unpack_epub.py" source.epub work/
 
 ## Production loop
 
-Work in reading order. Use a translate -> check -> continue loop until the requested scope is complete. The default unit is one complete section; for speed, combine 2-4 adjacent short sections when they share the same topic and risk profile.
+Work in reading order. Use a translate -> check -> continue loop until the requested scope is complete. In `quality` mode, the default unit is one complete section. In `speed` mode, combine 3-8 adjacent short sections or roughly 10-20 source pages when they share the same topic and risk profile.
 
 1. Read the full section, its preceding and following paragraphs, and all footnotes it references.
 2. Classify each block as prose, linguistic evidence, quotation, notation, caption, table, or navigation text.
 3. Translate prose directly in XHTML. Prefer targeted patches over XML reserialization.
 4. Translate the section's headings, captions, alt text, cross-references, and notes in the same pass.
 5. Preserve object-language examples and all evidential notation.
-6. Re-read the Chinese without the source, then back-check it against the source.
-7. Parse the changed XHTML immediately.
+6. In `quality` mode, reread the Chinese without the source and back-check each batch. In `speed` mode, do one consolidated bilingual review after the larger batch, prioritizing headings, claims, examples, citations, terminology, and paragraph alignment.
+7. Parse the changed XHTML immediately after each batch.
 8. Update the glossary and `TRANSLATION_STATE.md` after each verified batch.
-9. Continue with the next section or batch.
+9. In `speed` mode, run full EPUB validation every 2-3 batches and at each chapter boundary; in `quality` mode, run it at each chapter boundary or after risky structural edits.
+10. Continue with the next section or batch.
 
 Do not translate the entire book in one uncontrolled batch. Do not use global replacement for ambiguous terminology.
 
@@ -64,8 +76,9 @@ Prefer one visible current output file and a quiet checkpoint directory:
 - Keep the main build at a stable path such as `translated-current.epub` or `<Chinese title>（当前译稿）.epub`.
 - Put dated or section-specific checkpoint EPUBs under a `checkpoints/` or `archive/` directory, not beside the main deliverable.
 - Use XHTML/XML parsing after every translated batch.
-- Use full EPUB packaging and source/target validation after each chapter, after risky structural edits, or before handoff.
-- For long chapters, run full validation every 3-5 sections if many links, figures, notes, or pagebreak anchors were touched.
+- In `quality` mode, use full EPUB packaging and source/target validation after each chapter, after risky structural edits, or before handoff.
+- In `speed` mode, use full EPUB packaging and source/target validation every 2-3 batches, at each chapter boundary, after risky structural edits, and before handoff.
+- For long chapters, never let a speed-mode batch exceed roughly 20 source pages without an XML parse and structural review.
 - When a packager refuses to overwrite, either move the old current build to the checkpoint directory or use the bundled `package_epub.py --replace` option intentionally for the stable current build.
 
 Do not leave many similarly named EPUBs in the user's working or downloads folder unless the user explicitly asks for every checkpoint to be visible.

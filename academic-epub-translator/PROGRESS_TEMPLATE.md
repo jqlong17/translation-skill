@@ -9,6 +9,7 @@
 
 ## Translation brief
 
+- Translation mode: `quality` or `speed`
 - Chinese title:
 - Source language:
 - Target language:
