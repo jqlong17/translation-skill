@@ -131,6 +131,17 @@ python3 academic-epub-translator/scripts/validate_epub.py /path/to/output.epub -
 - 术语表和 `TRANSLATION_STATE.md` 与实际进度一致。
 - 没有把作为证据的英文例句、公式、代码或判断标记误翻。
 
+## 获取 EPUB
+
+请使用你有权处理的 EPUB 文件，例如：
+
+- 自己购买并允许个人处理的电子书。
+- 作者、出版社或课程公开发布的 EPUB。
+- 公版书和开放授权书籍，例如 Project Gutenberg、Standard Ebooks、OpenStax、DOAB、OAPEN。
+- 学校、图书馆或机构订阅中允许下载和个人研究使用的 EPUB。
+
+不要把这个 skill 用作规避版权、DRM 或平台使用条款的工具。AI agent 在处理用户提供的 EPUB 时，应默认提醒用户确认其拥有相应使用权。
+
 ## 版权提醒
 
 本仓库不包含任何书籍正文或译文，只提供翻译工作流和校验脚本。请只翻译你有权处理的 EPUB 文件，并遵守所在地区的版权与使用限制。
